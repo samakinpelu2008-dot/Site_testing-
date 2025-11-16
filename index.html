@@ -165,38 +165,36 @@ adminBtn.addEventListener("click", ()=>{
   }
 });
 
-// Load data and listen for changes
+// Listen to Firebase for live updates
 onValue(matchRef, (snapshot) => {
   const data = snapshot.val(); if(!data) return;
-  const stage = data.stage || "PRE";
-  const seconds = data.timer || 0;
 
-  document.getElementById("timer").textContent = formatTime(seconds);
-
+  document.getElementById("timer").textContent = formatTime(data.timer || 0);
   updateScoreDisplay('scoreCPE', data.scoreCPE);
   updateScoreDisplay('scoreFRM', data.scoreFRM);
 
   const goalEl = document.getElementById("goals");
-  goalEl.textContent = (data.goalScorers && data.goalScorers.length>0)? data.goalScorers.join(", "):"None yet";
+  goalEl.textContent = (data.goalScorers && data.goalScorers.length>0) ? data.goalScorers.join(", ") : "None yet";
   goalEl.classList.remove('fadeIn'); void goalEl.offsetWidth; goalEl.classList.add('fadeIn');
 
-  const liveDiv = document.getElementById("liveIndicator");
-  const vsDisplay = document.getElementById("vsDisplay");
-  if(stage=="PRE"){ liveDiv.innerHTML=""; vsDisplay.textContent="VS"; }
-  else if(stage=="FH" || stage=="SH"){ liveDiv.innerHTML='<div class="live">LIVE</div>'; vsDisplay.textContent=`${data.scoreCPE ||0} - ${data.scoreFRM ||0}`; }
-  else if(stage=="HT"){ liveDiv.innerHTML=""; vsDisplay.textContent=`${data.scoreCPE ||0} - ${data.scoreFRM ||0}`; }
-  else if(stage=="FT"){ liveDiv.innerHTML=""; vsDisplay.textContent=`${data.scoreCPE ||0} - ${data.scoreFRM ||0}`; }
-  
-  const commentsEl = document.getElementById("liveComments");
-  commentsEl.innerHTML="";
-  if(data.liveComments){ 
-    const p = document.createElement("p"); 
-    p.textContent=data.liveComments; p.classList.add('slideIn'); 
-    commentsEl.appendChild(p);
+  const liveDiv = document.getElementById("liveComments");
+  liveDiv.innerHTML = "";
+  if(data.liveComments && data.liveComments.length>0){
+    data.liveComments.forEach(comment=>{
+      const p = document.createElement("p");
+      p.textContent = comment;
+      p.classList.add("slideIn");
+      liveDiv.appendChild(p);
+    });
   }
+
+  const vsDisplay = document.getElementById("vsDisplay");
+  const liveIndicator = document.getElementById("liveIndicator");
+  if(data.stage=="PRE"){ liveIndicator.innerHTML=""; vsDisplay.textContent="VS"; }
+  else{ liveIndicator.innerHTML='<div class="live">LIVE</div>'; vsDisplay.textContent=`${data.scoreCPE ||0} - ${data.scoreFRM ||0}`; }
 });
 
-// Timer increments every second if in FH or SH
+// Timer increment during FH or SH
 setInterval(async ()=>{
   const snap = await get(matchRef);
   const data = snap.val();
@@ -227,9 +225,9 @@ function changeStage(){
   update(matchRef,{stage:stage});
 }
 function setScore(team){
-  const val = (team=="CPE")? document.getElementById("cpeScore").value : document.getElementById("frmScore").value;
-  if(team=="CPE") update(matchRef,{scoreCPE:Number(val)});
-  else update(matchRef,{scoreFRM:Number(val)});
+  const val = (team=="CPE")? Number(document.getElementById("cpeScore").value) : Number(document.getElementById("frmScore").value);
+  if(team=="CPE") update(matchRef,{scoreCPE:val});
+  else update(matchRef,{scoreFRM:val});
 }
 function addGoal(){
   const player = document.getElementById("goalPlayer").value.trim();
@@ -244,7 +242,11 @@ function addGoal(){
 function addCommentary(){
   const text = document.getElementById("commentText").value.trim();
   if(!text) return;
-  update(matchRef,{liveComments:text});
+  get(ref(database,"match/liveComments")).then(snap=>{
+    let arr = snap.val()||[];
+    arr.push(text);
+    update(matchRef,{liveComments:arr});
+  });
   document.getElementById("commentText").value="";
 }
 </script>
