@@ -136,12 +136,11 @@ matchRef.on("value", snapshot => {
     liveDiv.appendChild(p);
   });
 
-  document.getElementById("timer").textContent = formatTime(data.timer || 0);
   document.getElementById("vsDisplay").textContent = (data.stage=="PRE")? "VS" : `${data.scoreCPE||0} - ${data.scoreFRM||0}`;
 
-  // Live timer handling
-  if((data.stage=="FH" || data.stage=="SH") && !timerInterval){
-    startLiveTimer(data.timer || 0);
+  // Live timer using startTime
+  if((data.stage=="FH" || data.stage=="SH") && data.startTime){
+    startLiveTimerFromStartTime(data.startTime);
   } else if(data.stage=="HT" || data.stage=="FT"){
     clearInterval(timerInterval);
     timerInterval = null;
@@ -151,7 +150,12 @@ matchRef.on("value", snapshot => {
 // Admin functions
 function changeStage(){
   const stage = document.getElementById("stageSelect").value;
-  matchRef.update({stage});
+  if(stage=="FH" || stage=="SH"){
+    // Start the timer based on current timestamp
+    matchRef.update({stage, startTime: Date.now(), timer:0});
+  } else{
+    matchRef.update({stage});
+  }
 }
 
 function setScore(team){
@@ -183,13 +187,13 @@ function addCommentary(){
 }
 
 // Timer functions
-function startLiveTimer(startSeconds){
-  let sec = startSeconds;
+function startLiveTimerFromStartTime(startTimestamp){
+  if(timerInterval) clearInterval(timerInterval);
   timerInterval = setInterval(()=>{
-    sec++;
+    const now = Date.now();
+    let sec = Math.floor((now - startTimestamp)/1000);
     document.getElementById("timer").textContent = formatTime(sec);
-    matchRef.update({timer: sec});
-  }, 1000);
+  },1000);
 }
 
 function formatTime(sec){
