@@ -90,7 +90,7 @@ body{
   </div>
 </div>
 
-<!-- Firebase v9 CDN -->
+<!-- Firebase v9 Compat CDN -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 <script>
@@ -117,6 +117,8 @@ document.getElementById("adminBtn").addEventListener("click", ()=>{
   } else alert("Wrong password!");
 });
 
+let timerInterval = null;
+
 // Live updates from Firebase
 matchRef.on("value", snapshot => {
   const data = snapshot.val();
@@ -124,10 +126,7 @@ matchRef.on("value", snapshot => {
 
   document.getElementById("scoreCPE").textContent = data.scoreCPE || "";
   document.getElementById("scoreFRM").textContent = data.scoreFRM || "";
-  document.getElementById("timer").textContent = formatTime(data.timer || 0);
-
-  const goalEl = document.getElementById("goals");
-  goalEl.textContent = (data.goalScorers && data.goalScorers.length>0)? data.goalScorers.join(", ") : "None yet";
+  document.getElementById("goals").textContent = (data.goalScorers && data.goalScorers.length>0)? data.goalScorers.join(", ") : "None yet";
 
   const liveDiv = document.getElementById("liveComments");
   liveDiv.innerHTML = "";
@@ -137,7 +136,16 @@ matchRef.on("value", snapshot => {
     liveDiv.appendChild(p);
   });
 
+  document.getElementById("timer").textContent = formatTime(data.timer || 0);
   document.getElementById("vsDisplay").textContent = (data.stage=="PRE")? "VS" : `${data.scoreCPE||0} - ${data.scoreFRM||0}`;
+
+  // Live timer handling
+  if((data.stage=="FH" || data.stage=="SH") && !timerInterval){
+    startLiveTimer(data.timer || 0);
+  } else if(data.stage=="HT" || data.stage=="FT"){
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
 });
 
 // Admin functions
@@ -145,11 +153,13 @@ function changeStage(){
   const stage = document.getElementById("stageSelect").value;
   matchRef.update({stage});
 }
+
 function setScore(team){
   const val = (team=="CPE")? Number(document.getElementById("cpeScore").value) : Number(document.getElementById("frmScore").value);
   if(team=="CPE") matchRef.update({scoreCPE:val});
   else matchRef.update({scoreFRM:val});
 }
+
 function addGoal(){
   const player = document.getElementById("goalPlayer").value.trim();
   if(!player) return;
@@ -160,6 +170,7 @@ function addGoal(){
   });
   document.getElementById("goalPlayer").value="";
 }
+
 function addCommentary(){
   const text = document.getElementById("commentText").value.trim();
   if(!text) return;
@@ -171,10 +182,25 @@ function addCommentary(){
   document.getElementById("commentText").value="";
 }
 
-// Timer formatting
+// Timer functions
+function startLiveTimer(startSeconds){
+  let sec = startSeconds;
+  timerInterval = setInterval(()=>{
+    sec++;
+    document.getElementById("timer").textContent = formatTime(sec);
+    matchRef.update({timer: sec});
+  }, 1000);
+}
+
 function formatTime(sec){
-  if(sec<=1800){ let m=Math.floor(sec/60); let s=sec%60; return `${m}:${s.toString().padStart(2,"0")}`; }
-  else{ let extra = sec-1800; return `30:00 +${extra}`; }
+  if(sec <= 1800){
+    let m=Math.floor(sec/60);
+    let s=sec%60;
+    return `${m}:${s.toString().padStart(2,"0")}`;
+  } else {
+    let extra = sec-1800;
+    return `30:00 +${extra}`;
+  }
 }
 </script>
 
