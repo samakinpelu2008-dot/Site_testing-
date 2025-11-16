@@ -19,13 +19,48 @@ body{
 .vs{font-size:32px; font-weight:700; color:#ffdd00; margin:0 10px;}
 .info-box{background: rgba(255,255,255,0.1); padding:15px; border-radius:12px; margin-bottom:20px;}
 .goal-box{background: rgba(255,255,255,0.1); padding:12px; border-radius:12px; margin-bottom:15px;}
-.commentary{background: rgba(255,255,255,0.1); border-radius:12px; padding:12px; max-height:150px; overflow-y:auto;}
+.commentary{background: rgba(255,255,255,0.1); border-radius:12px; padding:12px; max-height:150px; overflow-y:auto; margin-bottom:15px;}
+.fan-section{background: rgba(255,255,255,0.05); border-radius:12px; padding:12px; margin-bottom:20px;}
+.fan-section input{width:70%; padding:6px; border-radius:8px; border:none; margin-right:5px;}
+.fan-section button{padding:6px 10px; border-radius:8px; border:none; cursor:pointer; background:#ffdd00; color:#000;}
+#fanComments p {
+  background: rgba(255,255,255,0.1);
+  padding:8px;
+  border-radius:8px;
+  margin:4px 0;
+}
 .admin-btn{background:#ffdd00;color:#000;border:none;padding:8px 15px;border-radius:12px;cursor:pointer;margin-bottom:10px;}
 #adminPanel{display:none;margin-top:10px;background: rgba(255,255,255,0.15); padding:10px; border-radius:12px;}
 #adminPanel input, #adminPanel select, #adminPanel button{margin:5px 0;padding:6px;border-radius:8px;border:none;}
-#timer{font-size:28px; font-weight:700; text-align:center; margin-bottom:15px;}
-#liveBar{height:8px; background:#00ff00; border-radius:4px; margin-bottom:10px; animation: move 2s linear infinite; display:none;}
-@keyframes move{0%{transform:translateX(0);}50%{transform:translateX(90%);}100%{transform:translateX(0);}}
+#timer{
+  font-size:28px; font-weight:700; text-align:center; margin-bottom:10px; 
+  color: #00ff00; text-shadow:0 0 8px #00ff00;
+}
+#liveBar{
+  height:6px; width:20%; background:#00ff00; border-radius:3px;
+  margin:0 auto 10px auto; display:none;
+  animation: liveMove 2s infinite ease-in-out;
+}
+@keyframes liveMove{
+  0% { transform: translateX(-100%); opacity: 0; }
+  25% { transform: translateX(0%); opacity: 1; }
+  50% { transform: translateX(100%); opacity: 0; }
+  75% { transform: translateX(0%); opacity: 1; }
+  100% { transform: translateX(-100%); opacity: 0; }
+}
+.floatingHeart {
+  position:absolute;
+  font-size:24px;
+  animation: floatUp 1s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes floatUp {
+  0% { opacity:1; transform: translateY(0) scale(1); }
+  100% { opacity:0; transform: translateY(-100px) scale(1.5); }
+}
+#loveButton{
+  position:fixed; bottom:30px; right:30px; font-size:40px; cursor:pointer; user-select:none;
+}
 </style>
 </head>
 <body>
@@ -67,6 +102,13 @@ body{
     <div id="liveComments"></div>
   </div>
 
+  <div class="fan-section">
+    <h3>Fan Comments ❤️</h3>
+    <input type="text" id="fanComment" placeholder="Write your comment..." />
+    <button onclick="addFanComment()">Send</button>
+    <div id="fanComments"></div>
+  </div>
+
   <button class="admin-btn" id="adminBtn">Show Admin Controls</button>
   <div id="adminPanel">
     <label>Stage:</label>
@@ -93,7 +135,8 @@ body{
   </div>
 </div>
 
-<!-- Firebase v9 Compat CDN -->
+<div id="loveButton">💚</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 <script>
@@ -109,8 +152,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const matchRef = database.ref("match");
+const fanRef = database.ref("fanComments");
+const loveRef = database.ref("loveCount");
 
-// Admin panel password
 const adminPassword = "CPE2025";
 document.getElementById("adminBtn").addEventListener("click", ()=>{
   let pass = prompt("Enter admin password:");
@@ -122,7 +166,7 @@ document.getElementById("adminBtn").addEventListener("click", ()=>{
 
 let timerInterval = null;
 
-// Live updates from Firebase
+// Match data listener
 matchRef.on("value", snapshot => {
   const data = snapshot.val();
   if(!data) return;
@@ -141,10 +185,8 @@ matchRef.on("value", snapshot => {
 
   document.getElementById("vsDisplay").textContent = (data.stage=="PRE")? "VS" : `${data.scoreCPE||0} - ${data.scoreFRM||0}`;
 
-  // Show live bar only in FH, HT, SH
   document.getElementById("liveBar").style.display = (["FH","HT","SH"].includes(data.stage)) ? "block":"none";
 
-  // Timer logic
   if(data.stage=="FH" || data.stage=="SH"){
     if(data.startTime){
       startLiveTimerFromStartTime(data.startTime, data.stage);
@@ -158,7 +200,18 @@ matchRef.on("value", snapshot => {
   }
 });
 
-// Admin functions
+// Fan comments listener
+fanRef.on("value", snapshot=>{
+  const data = snapshot.val() || [];
+  const fanDiv = document.getElementById("fanComments");
+  fanDiv.innerHTML = "";
+  data.forEach(c=>{
+    const p = document.createElement("p");
+    p.textContent=c;
+    fanDiv.appendChild(p);
+  });
+});
+
 function changeStage(){
   const stage = document.getElementById("stageSelect").value;
   if(stage=="FH" || stage=="SH"){
@@ -196,6 +249,34 @@ function addCommentary(){
   document.getElementById("commentText").value="";
 }
 
+// Fan comment
+function addFanComment(){
+  const text = document.getElementById("fanComment").value.trim();
+  if(!text) return;
+  fanRef.once("value").then(s=>{
+    let arr = s.val()||[];
+    arr.push(text);
+    fanRef.set(arr);
+  });
+  document.getElementById("fanComment").value="";
+}
+
+// Floating love button
+document.getElementById("loveButton").addEventListener("click", e=>{
+  const heart = document.createElement("div");
+  heart.className="floatingHeart";
+  heart.textContent="💚";
+  heart.style.left=(e.clientX-12)+"px";
+  heart.style.top=(e.clientY-12)+"px";
+  document.body.appendChild(heart);
+  setTimeout(()=>heart.remove(),1000);
+
+  loveRef.once("value").then(s=>{
+    let count = s.val()||0;
+    loveRef.set(count+1);
+  });
+});
+
 // Timer function
 function startLiveTimerFromStartTime(startTimestamp, stage){
   if(timerInterval) clearInterval(timerInterval);
@@ -208,7 +289,7 @@ function startLiveTimerFromStartTime(startTimestamp, stage){
       if(elapsed <=1800) displayTime = formatMinutes(elapsed);
       else displayTime = `30:00 +${elapsed-1800}`;
     } else if(stage=="SH"){
-      elapsed += 1800; // second half starts from 30
+      elapsed += 1800;
       if(elapsed <=3600) displayTime = formatMinutes(elapsed);
       else displayTime = `60:00 +${elapsed-3600}`;
     }
@@ -223,6 +304,5 @@ function formatMinutes(sec){
   return `${m}:${s.toString().padStart(2,"0")}`;
 }
 </script>
-
 </body>
 </html>
