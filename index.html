@@ -78,13 +78,13 @@ body{
     <div class="team">
       <img src="https://i.ibb.co/XfTKYHJ0/IMG-20251009-WA0089.jpg" alt="CPE Logo">
       <h2>CPE</h2>
-      <div class="score" id="scoreCPE">0</div>
+      <div class="score" id="scoreCPE"></div>
     </div>
     <div class="vs" id="vsDisplay">VS</div>
     <div class="team">
       <img src="https://i.ibb.co/rR9PL8DG/IMG-20251116-200233.png" alt="FRM Logo">
       <h2>FRM</h2>
-      <div class="score" id="scoreFRM">0</div>
+      <div class="score" id="scoreFRM"></div>
     </div>
   </div>
 
@@ -107,7 +107,7 @@ body{
     <div id="liveComments"></div>
   </div>
 
-  <button class="admin-btn" onclick="showAdmin()">Show Admin Controls</button>
+  <button class="admin-btn" id="adminBtn">Show Admin Controls</button>
   <div id="adminPanel">
     <label>Set Stage:</label>
     <select id="stageSelect">
@@ -147,19 +147,23 @@ const firebaseConfig = {
   appId: "1:502451588704:web:56bd4d7fc98814cddfbd05"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const matchRef = ref(database, "match");
 
-// Admin password
 const adminPassword = "CPE2025";
-function showAdmin(){
-  const pass = prompt("Enter admin password:");
+const adminBtn = document.getElementById("adminBtn");
+const adminPanel = document.getElementById("adminPanel");
+
+adminBtn.addEventListener("click", ()=>{
+  let pass = prompt("Enter admin password:");
   if(pass === adminPassword){
-    document.getElementById("adminPanel").style.display = "block";
-  } else { alert("Wrong password!"); }
-}
+    adminPanel.style.display = "block";
+    adminBtn.style.display = "none";
+  } else {
+    alert("Wrong password!");
+  }
+});
 
 // Load data and listen for changes
 onValue(matchRef, (snapshot) => {
@@ -169,8 +173,8 @@ onValue(matchRef, (snapshot) => {
 
   document.getElementById("timer").textContent = formatTime(seconds);
 
-  updateScoreDisplay('scoreCPE', data.scoreCPE || 0);
-  updateScoreDisplay('scoreFRM', data.scoreFRM || 0);
+  updateScoreDisplay('scoreCPE', data.scoreCPE);
+  updateScoreDisplay('scoreFRM', data.scoreFRM);
 
   const goalEl = document.getElementById("goals");
   goalEl.textContent = (data.goalScorers && data.goalScorers.length>0)? data.goalScorers.join(", "):"None yet";
@@ -209,9 +213,11 @@ function formatTime(sec){
 
 function updateScoreDisplay(id, value){
   const el = document.getElementById(id);
-  if(el.textContent != value) {
-    el.textContent=value;
-    el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+  if(value!==0 && value!=="" && value!==null){
+    if(el.textContent != value) {
+      el.textContent=value;
+      el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
+    }
   }
 }
 
