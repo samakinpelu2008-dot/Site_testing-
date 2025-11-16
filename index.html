@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Match Center – CPE vs FRM</title>
+<style>
+body{
+  margin:0;
+  background:#f2f2f2;
+  font-family: Arial, sans-serif;
+}
+
+/* MAIN CONTAINER */
+.container{
+  width:95%;
+  margin:auto;
+  padding-bottom:40px;
+}
+
+/* TITLE */
+.header{
+  background:#000;
+  color:#fff;
+  padding:20px;
+  text-align:center;
+  font-size:28px;
+  font-weight:bold;
+}
+
+/* SCOREBOARD */
+.scoreboard{
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  margin-top:20px;
+  box-shadow:0 0 7px rgba(0,0,0,0.2);
+  text-align:center;
+}
+
+.team-logos{
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+}
+
+.team-logo img{
+  width:55px;
+  height:55px;
+  border-radius:5px;
+}
+
+.team-name{
+  font-size:20px;
+  font-weight:bold;
+}
+
+.score{
+  font-size:42px;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+/* TIMER */
+#timer{
+  font-size:32px;
+  margin-top:10px;
+  font-weight:bold;
+}
+
+/* INFO SECTION */
+.info-box{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-top:20px;
+  box-shadow:0 0 7px rgba(0,0,0,0.2);
+}
+
+.info-box h3{
+  margin-top:0;
+}
+
+/* GOAL SCORERS */
+.goals-box{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-top:20px;
+  box-shadow:0 0 7px rgba(0,0,0,0.2);
+}
+
+/* COMMENTARY */
+.commentary-box{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-top:20px;
+  box-shadow:0 0 7px rgba(0,0,0,0.2);
+}
+
+/* PLAYERS SECTION */
+.players-box{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-top:20px;
+  box-shadow:0 0 7px rgba(0,0,0,0.2);
+}
+
+.players-box img{
+  width:40px;
+  height:40px;
+  border-radius:5px;
+  margin-right:5px;
+}
+
+.player-row{
+  display:flex;
+  align-items:center;
+  margin-bottom:5px;
+  font-size:14px;
+}
+
+.stage-title{
+  font-size:20px;
+  margin-top:10px;
+  font-weight:bold;
+}
+
+</style>
+
+<script>
+/* =====================================
+      MATCH STAGE CONTROL
+   =====================================
+
+   PRE  = Pre-Match
+   FH   = First Half
+   HT   = Half Time
+   SH   = Second Half
+   FT   = Full Time
+
+   CHANGE ONLY THIS:
+*/
+let matchStage = "PRE";   // <<< CHANGE THIS ONLY
+// =====================================
+
+let time = 0;
+let started = false;
+
+function startTimer(){
+  if(started) return;
+  started = true;
+
+  setInterval(()=>{
+    time++;
+
+    let min = Math.floor(time/60);
+    let sec = String(time % 60).padStart(2,'0');
+
+    if(matchStage === "FH"){
+      if(min > 45){
+        document.getElementById("timer").innerHTML = "45+"+(min-45)+":"+sec;
+      } else {
+        document.getElementById("timer").innerHTML = min+":"+sec;
+      }
+    }
+
+    if(matchStage === "SH"){
+      if(min > 45){
+        document.getElementById("timer").innerHTML = "45+"+(min-45)+":"+sec;
+      } else {
+        document.getElementById("timer").innerHTML = min+":"+sec;
+      }
+    }
+
+  },1000);
+}
+
+function loadStage(){
+  if(matchStage === "PRE"){
+    document.getElementById("stage").innerHTML = "⚽ MATCH STARTING SOON";
+    document.getElementById("timer").innerHTML = "VS";
+  }
+
+  if(matchStage === "FH"){
+    document.getElementById("stage").innerHTML = "⚽ FIRST HALF";
+    startTimer();
+  }
+
+  if(matchStage === "HT"){
+    document.getElementById("stage").innerHTML = "⏸ HALF TIME";
+    document.getElementById("timer").innerHTML = "BREAK";
+  }
+
+  if(matchStage === "SH"){
+    document.getElementById("stage").innerHTML = "⚽ SECOND HALF";
+    startTimer();
+  }
+
+  if(matchStage === "FT"){
+    document.getElementById("stage").innerHTML = "🏁 FULL TIME";
+    document.getElementById("timer").innerHTML = "FULL TIME";
+  }
+}
+</script>
+</head>
+
+<body onload="loadStage()">
+
+<div class="header">CPE vs FRM — Match Center</div>
+
+<div class="container">
+
+<!-- =============================== -->
+<!-- SCOREBOARD -->
+<!-- =============================== -->
+<div class="scoreboard">
+
+  <div id="stage" class="stage-title"></div>
+
+  <div id="timer"></div>
+
+  <div class="score">  
+    CPE 0 - 0 FRM
+  </div>
+
+  <div class="team-logos">
+    <div class="team">
+      <div class="team-name">CPE</div>
+      <div class="team-logo"><img src="https://i.ibb.co/XfTKYHJ0/IMG-20251009-WA0089.jpg"></div>
+    </div>
+
+    <div class="team">
+      <div class="team-name">FRM</div>
+      <div class="team-logo"><img src="https://i.ibb.co/rR9PL8DG/IMG-20251116-200233.png"></div>
+    </div>
+  </div>
+</div>
+
+<!-- INFO SECTION -->
+<div class="info-box">
+  <h3>📌 Match Information</h3>
+  <p><b>Competition:</b> Freshers Cup</p>
+  <p><b>Stage:</b> First Stage</p>
+  <p><b>Venue:</b> Lico Field</p>
+  <p><b>Location:</b> LAUTECH, Ogbomosho</p>
+  <p><b>Weather:</b> Sunny</p>
+  <p><b>Kick-off:</b> 11 O'clock</p>
+</div>
+
+<!-- GOAL SCORERS -->
+<div class="goals-box">
+  <h3>⚽ Goal Scorers</h3>
+  <ul>
+    <li>No goals yet</li>
+  </ul>
+</div>
+
+<!-- COMMENTARY -->
+<div class="commentary-box">
+  <h3>📝 Live Commentary</h3>
+  <p>No updates yet…</p>
+</div>
+
+<!-- PLAYERS -->
+<div class="players-box">
+  <h3>👥 Players</h3>
+
+  <h4>CPE</h4>
+  <div class="player-row"><img src=""> Player 1</div>
+  <div class="player-row"><img src=""> Player 2</div>
+  <div class="player-row"><img src=""> Player 3</div>
+  <div class="player-row"><img src=""> Player 4</div>
+  <div class="player-row"><img src=""> Player 5</div>
+  <div class="player-row"><img src=""> Player 6</div>
+  <div class="player-row"><img src=""> Player 7</div>
+  <div class="player-row"><img src=""> Player 8</div>
+  <div class="player-row"><img src=""> Player 9</div>
+  <div class="player-row"><img src=""> Player 10</div>
+  <div class="player-row"><img src=""> Player 11</div>
+
+  <h4>FRM</h4>
+  <div class="player-row"><img src=""> Player 1</div>
+  <div class="player-row"><img src=""> Player 2</div>
+  <div class="player-row"><img src=""> Player 3</div>
+  <div class="player-row"><img src=""> Player 4</div>
+  <div class="player-row"><img src=""> Player 5</div>
+  <div class="player-row"><img src=""> Player 6</div>
+  <div class="player-row"><img src=""> Player 7</div>
+  <div class="player-row"><img src=""> Player 8</div>
+  <div class="player-row"><img src=""> Player 9</div>
+  <div class="player-row"><img src=""> Player 10</div>
+  <div class="player-row"><img src=""> Player 11</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
