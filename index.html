@@ -4,146 +4,198 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Freshers Cup – CPE vs FRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* =========================
+   GLOBAL STYLES
+========================= */
 body{
   margin:0;
-  font-family: Arial, sans-serif;
-  background:#0b8f2f;
-}
-.container{
-  max-width:900px;
-  margin:auto;
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg,#0b8f2f,#065f2b);
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  min-height:100vh;
   padding:20px;
+  box-sizing:border-box;
+  color:#fff;
 }
 
-/* SCOREBOARD CARD */
-.scoreboard{
-  background:white;
-  border-radius:20px;
-  padding:20px;
-  text-align:center;
-  box-shadow:0 4px 15px rgba(0,0,0,0.3);
-  margin-bottom:20px;
+/* =========================
+   SCOREBOARD CARD
+========================= */
+.card{
+  background: linear-gradient(145deg, #1e1e2f, #2c2c45);
+  width:100%;
+  max-width:700px;
+  border-radius:25px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  overflow:hidden;
+  padding:30px 20px;
+  animation: fadeIn 1.2s ease-out;
 }
-.teams{
+@keyframes fadeIn{
+  from{opacity:0; transform: translateY(-20px);}
+  to{opacity:1; transform: translateY(0);}
+}
+
+/* TEAM ROW */
+.team-row{
   display:flex;
   justify-content:space-between;
   align-items:center;
+  margin-bottom:20px;
 }
 .team{
-  width:30%;
+  text-align:center;
+  flex:1;
 }
 .team img{
-  width:80px;
-  height:80px;
-  object-fit:cover;
+  width:90px;
+  height:90px;
   border-radius:50%;
+  border:3px solid #fff;
+  margin-bottom:10px;
+  transition: transform 0.3s;
 }
+.team img:hover{
+  transform: scale(1.1);
+}
+.team h2{
+  margin:0;
+  font-size:22px;
+  letter-spacing:1px;
+}
+
+/* VS AND SCORE */
 .vs{
-  font-size:28px;
-  font-weight:bold;
-  color:#333;
+  font-size:32px;
+  font-weight:700;
+  color:#ffdd00;
+  margin:0 15px;
+  animation: pulse 1s infinite alternate;
 }
-.info{
-  text-align:left;
-  background:#f5f5f5;
-  border-radius:12px;
-  padding:10px;
-  margin-top:15px;
+@keyframes pulse{
+  0%{transform: scale(1);}
+  100%{transform: scale(1.1);}
 }
-.info p{
+
+/* SCORE NUMBERS */
+.score{
+  font-size:48px;
+  font-weight:900;
+  color:#00ffcc;
+  margin-top:5px;
+  transition: all 0.5s ease-in-out;
+}
+
+/* INFO BOX */
+.info-box{
+  background: rgba(255,255,255,0.1);
+  padding:15px;
+  border-radius:15px;
+  margin-bottom:20px;
+  line-height:1.6;
+}
+.info-box p{
   margin:5px 0;
+  font-size:15px;
 }
 
 /* LIVE INDICATOR */
 .live{
   display:inline-block;
-  background:#00c853;
-  color:white;
-  padding:4px 12px;
-  font-weight:bold;
-  border-radius:6px;
-  margin-bottom:10px;
-  animation: move 1s infinite alternate;
+  background:#ff3d00;
+  color:#fff;
+  font-weight:700;
+  padding:5px 15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  animation: liveAnim 1s infinite alternate;
 }
-@keyframes move{
-  from{transform:translateX(-6px);}
-  to{transform:translateX(6px);}
+@keyframes liveAnim{
+  0%{transform: translateX(-5px);}
+  100%{transform: translateX(5px);}
 }
 
 /* TIMER */
 #timer{
   font-size:28px;
-  font-weight:bold;
-  margin:10px 0;
-}
-
-/* PITCH & FORMATION */
-.pitch{
-  width:100%;
-  background:url('https://i.ibb.co/ZmRhnCq/grass3.jpg');
-  background-size:cover;
-  background-position:center;
-  border-radius:15px;
-  padding:20px 0;
+  font-weight:700;
+  color:#ffdd00;
   margin-bottom:20px;
-}
-.formation{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
   text-align:center;
-  color:white;
-  font-weight:bold;
-  font-size:13px;
-}
-.player{
-  background:rgba(0,0,0,0.6);
-  margin:5px;
-  padding:8px;
-  border-radius:8px;
 }
 
 /* GOAL SCORERS */
-.goalbox{
-  background:#f7f7f7;
-  padding:10px;
+.goal-box{
+  background: rgba(255,255,255,0.1);
+  padding:12px;
   border-radius:12px;
-  margin-top:10px;
+}
+.goal-box h3{
+  margin:0 0 8px 0;
+  font-size:18px;
+  color:#00ffcc;
+}
+.goal-box p{
+  margin:0;
 }
 
 /* COMMENTARY */
 .commentary{
-  background:#f9f9f9;
-  padding:10px;
+  background: rgba(255,255,255,0.1);
   border-radius:12px;
-  margin-bottom:10px;
+  padding:12px;
+  margin-top:20px;
+}
+.commentary h3{
+  margin:0 0 8px 0;
+  color:#ffdd00;
+}
+.commentary p{
+  margin:0;
+  font-size:14px;
+}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .team-row{
+    flex-direction:column;
+  }
+  .vs{
+    margin:15px 0;
+  }
 }
 
 </style>
 </head>
 <body>
-<div class="container">
 
-<!-- SCOREBOARD -->
-<div class="scoreboard" id="scoreboard">
+<div class="card">
 
+  <!-- LIVE & TIMER -->
   <div id="liveIndicator"></div>
+  <div id="timer">0:00</div>
 
-  <h2 id="timerDisplay"></h2>
-
-  <div class="teams">
+  <!-- TEAMS -->
+  <div class="team-row">
     <div class="team">
       <img src="https://i.ibb.co/XfTKYHJ0/IMG-20251009-WA0089.jpg" alt="CPE Logo">
-      <h3>CPE</h3>
+      <h2>CPE</h2>
+      <div class="score" id="scoreCPE">0</div>
     </div>
-    <div class="vs" id="scoreVS">VS</div>
+    <div class="vs" id="vsDisplay">VS</div>
     <div class="team">
       <img src="https://i.ibb.co/rR9PL8DG/IMG-20251116-200233.png" alt="FRM Logo">
-      <h3>FRM</h3>
+      <h2>FRM</h2>
+      <div class="score" id="scoreFRM">0</div>
     </div>
   </div>
 
-  <div class="info">
+  <!-- INFO SECTION -->
+  <div class="info-box">
     <p><strong>Competition:</strong> Freshers Cup</p>
     <p><strong>Stage:</strong> First Stage</p>
     <p><strong>Venue:</strong> Lico Field</p>
@@ -152,112 +204,114 @@ body{
     <p><strong>Kick Off:</strong> 11:00 AM</p>
   </div>
 
-</div>
+  <!-- GOAL SCORERS -->
+  <div class="goal-box">
+    <h3>Goal Scorers</h3>
+    <p id="goals">None yet</p>
+  </div>
 
-<!-- FORMATION PITCH -->
-<div class="pitch" id="pitch">
-  <div class="formation" id="formationCPE"></div>
-  <div class="formation" id="formationFRM" style="margin-top:15px;"></div>
-</div>
-
-<!-- GOAL SCORERS -->
-<div class="goalbox" id="goalBox">
-  <h3>Goal Scorers</h3>
-  <p id="goals">None yet</p>
-</div>
-
-<!-- COMMENTARY -->
-<div class="commentary" id="commentary">
-  <h3>Live Updates</h3>
-  <p id="liveComments">Match has not started.</p>
-</div>
+  <!-- LIVE COMMENTARY -->
+  <div class="commentary">
+    <h3>Live Updates</h3>
+    <p id="liveComments">Match has not started.</p>
+  </div>
 
 </div>
 
 <script>
-// ==========================
-// STAGE CONTROL
-// "PRE" = Pre-match
-// "FH" = First Half
-// "HT" = Half Time
-// "SH" = Second Half
-// "FT" = Full Time
-// ==========================
-let stage = "PRE"; // Change this to control the page
+// =======================
+// MASTER CONTROLS
+// =======================
 
-// ==========================
-// FORMATION DATA
-// 4-3-3 for both
-const formationCPE = ["GK","LB","CB","CB","RB","CM","CM","CAM","LW","ST","RW"];
-const formationFRM = ["GK","LB","CB","CB","RB","CM","CM","CAM","LW","ST","RW"];
+// STAGE: PRE, FH, HT, SH, FT
+let stage = "PRE";
 
-// ==========================
-// RENDER FORMATIONS
-function renderFormation(teamId, formation){
-  const container = document.getElementById(teamId);
-  container.innerHTML = "";
-  formation.forEach(pos=>{
-    const div = document.createElement("div");
-    div.className="player";
-    div.textContent=pos;
-    container.appendChild(div);
-  });
-}
+// SCORES
+let scoreCPE = 0;
+let scoreFRM = 0;
 
-// ==========================
 // TIMER
 let seconds = 0;
 let timerInterval;
+
 function startTimer(){
-  document.getElementById("timerDisplay").textContent="0:00";
+  clearInterval(timerInterval);
   timerInterval = setInterval(()=>{
     seconds++;
     let mins = Math.floor(seconds/60);
     let secs = seconds%60;
-    if(seconds<=1800){
-      document.getElementById("timerDisplay").textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
-    } else {
+    document.getElementById("timer").textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+    // Extra time after 30:00
+    if(seconds>1800){
       let extra = seconds-1800;
-      document.getElementById("timerDisplay").textContent = `30:00 +${extra}`;
+      document.getElementById("timer").textContent = `30:00 +${extra}`;
     }
   },1000);
 }
 
-// ==========================
-// UPDATE PAGE BASED ON STAGE
+// UPDATE STAGE DISPLAY
 function updateStage(){
   const liveDiv = document.getElementById("liveIndicator");
-  const scoreVS = document.getElementById("scoreVS");
+  const vsDisplay = document.getElementById("vsDisplay");
   const liveComments = document.getElementById("liveComments");
 
   if(stage=="PRE"){
     liveDiv.innerHTML="";
-    scoreVS.textContent="VS";
+    vsDisplay.textContent="VS";
     liveComments.textContent="Match has not started.";
+    clearInterval(timerInterval);
   } else if(stage=="FH" || stage=="SH"){
     liveDiv.innerHTML='<div class="live">LIVE</div>';
-    scoreVS.textContent="0 - 0";
+    vsDisplay.textContent=`${scoreCPE} - ${scoreFRM}`;
     liveComments.textContent="Match in progress...";
     startTimer();
   } else if(stage=="HT"){
     liveDiv.innerHTML="";
-    scoreVS.textContent="0 - 0";
+    vsDisplay.textContent=`${scoreCPE} - ${scoreFRM}`;
     liveComments.textContent="Half time.";
     clearInterval(timerInterval);
   } else if(stage=="FT"){
     liveDiv.innerHTML="";
-    scoreVS.textContent="0 - 0";
+    vsDisplay.textContent=`${scoreCPE} - ${scoreFRM}`;
     liveComments.textContent="Full time.";
     clearInterval(timerInterval);
   }
 }
 
-// ==========================
-// INITIALIZE
-renderFormation("formationCPE", formationCPE);
-renderFormation("formationFRM", formationFRM);
+// UPDATE SCORES (Animated)
+function updateScore(team, goals){
+  if(team=="CPE") scoreCPE=goals;
+  else if(team=="FRM") scoreFRM=goals;
+  const displayCPE = document.getElementById("scoreCPE");
+  const displayFRM = document.getElementById("scoreFRM");
+
+  displayCPE.textContent = scoreCPE;
+  displayFRM.textContent = scoreFRM;
+  // Animate pulse
+  displayCPE.style.transform="scale(1.5)";
+  displayFRM.style.transform="scale(1.5)";
+  setTimeout(()=>{
+    displayCPE.style.transform="scale(1)";
+    displayFRM.style.transform="scale(1)";
+  },300);
+}
+
+// UPDATE GOAL SCORERS
+function addGoalScorer(player){
+  const goalsEl = document.getElementById("goals");
+  if(goalsEl.textContent=="None yet") goalsEl.textContent=player;
+  else goalsEl.textContent += ", "+player;
+}
+
+// UPDATE LIVE COMMENTARY
+function addComment(text){
+  document.getElementById("liveComments").textContent=text;
+}
+
+// INITIAL RENDER
 updateStage();
 
 </script>
+
 </body>
 </html>
