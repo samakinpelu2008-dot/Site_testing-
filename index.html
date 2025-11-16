@@ -24,11 +24,14 @@ body{
 #adminPanel{display:none;margin-top:10px;background: rgba(255,255,255,0.15); padding:10px; border-radius:12px;}
 #adminPanel input, #adminPanel select, #adminPanel button{margin:5px 0;padding:6px;border-radius:8px;border:none;}
 #timer{font-size:28px; font-weight:700; text-align:center; margin-bottom:15px;}
+#liveBar{height:8px; background:#00ff00; border-radius:4px; margin-bottom:10px; animation: move 2s linear infinite; display:none;}
+@keyframes move{0%{transform:translateX(0);}50%{transform:translateX(90%);}100%{transform:translateX(0);}}
 </style>
 </head>
 <body>
 
 <div class="card">
+  <div id="liveBar"></div>
   <div id="timer">0:00</div>
 
   <div class="team-row">
@@ -138,12 +141,20 @@ matchRef.on("value", snapshot => {
 
   document.getElementById("vsDisplay").textContent = (data.stage=="PRE")? "VS" : `${data.scoreCPE||0} - ${data.scoreFRM||0}`;
 
-  // Live timer using startTime
-  if((data.stage=="FH" || data.stage=="SH") && data.startTime){
-    startLiveTimerFromStartTime(data.startTime);
-  } else if(data.stage=="HT" || data.stage=="FT"){
+  // Show live bar only in FH, HT, SH
+  document.getElementById("liveBar").style.display = (["FH","HT","SH"].includes(data.stage)) ? "block":"none";
+
+  // Timer logic
+  if(data.stage=="FH" || data.stage=="SH"){
+    if(data.startTime){
+      startLiveTimerFromStartTime(data.startTime, data.stage);
+    }
+  } else if(data.stage=="HT"){
+    document.getElementById("timer").textContent = "HALF-TIME";
     clearInterval(timerInterval);
-    timerInterval = null;
+  } else if(data.stage=="FT"){
+    document.getElementById("timer").textContent = "FULL-TIME";
+    clearInterval(timerInterval);
   }
 });
 
@@ -151,8 +162,7 @@ matchRef.on("value", snapshot => {
 function changeStage(){
   const stage = document.getElementById("stageSelect").value;
   if(stage=="FH" || stage=="SH"){
-    // Start the timer based on current timestamp
-    matchRef.update({stage, startTime: Date.now(), timer:0});
+    matchRef.update({stage, startTime: Date.now()});
   } else{
     matchRef.update({stage});
   }
@@ -186,25 +196,31 @@ function addCommentary(){
   document.getElementById("commentText").value="";
 }
 
-// Timer functions
-function startLiveTimerFromStartTime(startTimestamp){
+// Timer function
+function startLiveTimerFromStartTime(startTimestamp, stage){
   if(timerInterval) clearInterval(timerInterval);
   timerInterval = setInterval(()=>{
     const now = Date.now();
-    let sec = Math.floor((now - startTimestamp)/1000);
-    document.getElementById("timer").textContent = formatTime(sec);
+    let elapsed = Math.floor((now - startTimestamp)/1000);
+    let displayTime = "";
+
+    if(stage=="FH"){
+      if(elapsed <=1800) displayTime = formatMinutes(elapsed);
+      else displayTime = `30:00 +${elapsed-1800}`;
+    } else if(stage=="SH"){
+      elapsed += 1800; // second half starts from 30
+      if(elapsed <=3600) displayTime = formatMinutes(elapsed);
+      else displayTime = `60:00 +${elapsed-3600}`;
+    }
+
+    document.getElementById("timer").textContent = displayTime;
   },1000);
 }
 
-function formatTime(sec){
-  if(sec <= 1800){
-    let m=Math.floor(sec/60);
-    let s=sec%60;
-    return `${m}:${s.toString().padStart(2,"0")}`;
-  } else {
-    let extra = sec-1800;
-    return `30:00 +${extra}`;
-  }
+function formatMinutes(sec){
+  let m=Math.floor(sec/60);
+  let s=sec%60;
+  return `${m}:${s.toString().padStart(2,"0")}`;
 }
 </script>
 
