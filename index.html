@@ -28,9 +28,7 @@ body{
   padding:8px;
   border-radius:8px;
   margin:4px 0;
-  position: relative;
 }
-.deleteComment{position:absolute; right:5px; top:5px; cursor:pointer; color:#ff4444; font-weight:bold;}
 .admin-btn{background:#ffdd00;color:#000;border:none;padding:8px 15px;border-radius:12px;cursor:pointer;margin-bottom:10px;}
 #adminPanel{display:none;margin-top:10px;background: rgba(255,255,255,0.15); padding:10px; border-radius:12px;}
 #adminPanel input, #adminPanel select, #adminPanel button{margin:5px 0;padding:6px;border-radius:8px;border:none;}
@@ -39,16 +37,16 @@ body{
   color: #00ff00; text-shadow:0 0 8px #00ff00;
 }
 #liveBar{
-  height:6px; width:15%; background:#00ff00; border-radius:3px;
+  height:6px; width:20%; background:#00ff00; border-radius:3px;
   margin:0 auto 10px auto; display:none;
-  animation: liveMove 3s infinite ease-in-out;
+  animation: liveMove 2s infinite ease-in-out;
 }
 @keyframes liveMove{
-  0% { transform: translateX(-100%) scaleX(0.3); opacity: 0; }
-  25% { transform: translateX(0%) scaleX(1); opacity: 1; }
-  50% { transform: translateX(100%) scaleX(0.3); opacity: 0; }
-  75% { transform: translateX(0%) scaleX(1); opacity: 1; }
-  100% { transform: translateX(-100%) scaleX(0.3); opacity: 0; }
+  0% { transform: translateX(-100%); opacity: 0; }
+  25% { transform: translateX(0%); opacity: 1; }
+  50% { transform: translateX(100%); opacity: 0; }
+  75% { transform: translateX(0%); opacity: 1; }
+  100% { transform: translateX(-100%); opacity: 0; }
 }
 .floatingHeart {
   position:absolute;
@@ -69,7 +67,7 @@ body{
 
 <div class="card">
   <div id="liveBar"></div>
-  <div id="timer">0</div>
+  <div id="timer">0:00</div>
 
   <div class="team-row">
     <div class="team">
@@ -207,14 +205,9 @@ fanRef.on("value", snapshot=>{
   const data = snapshot.val() || [];
   const fanDiv = document.getElementById("fanComments");
   fanDiv.innerHTML = "";
-  data.forEach((c,i)=>{
+  data.forEach(c=>{
     const p = document.createElement("p");
     p.textContent=c;
-    const delBtn = document.createElement("span");
-    delBtn.textContent="×";
-    delBtn.className="deleteComment";
-    delBtn.onclick=()=>deleteFanComment(i);
-    p.appendChild(delBtn);
     fanDiv.appendChild(p);
   });
 });
@@ -268,14 +261,6 @@ function addFanComment(){
   document.getElementById("fanComment").value="";
 }
 
-function deleteFanComment(index){
-  fanRef.once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.splice(index,1);
-    fanRef.set(arr);
-  });
-}
-
 // Floating love button
 document.getElementById("loveButton").addEventListener("click", e=>{
   const heart = document.createElement("div");
@@ -297,20 +282,26 @@ function startLiveTimerFromStartTime(startTimestamp, stage){
   if(timerInterval) clearInterval(timerInterval);
   timerInterval = setInterval(()=>{
     const now = Date.now();
-    let elapsed = Math.floor((now - startTimestamp)/1000 / 60); // minutes only
+    let elapsed = Math.floor((now - startTimestamp)/1000);
     let displayTime = "";
 
     if(stage=="FH"){
-      if(elapsed <30) displayTime = `${elapsed}`;
-      else displayTime = `30 +${elapsed-30}`;
+      if(elapsed <=1800) displayTime = formatMinutes(elapsed);
+      else displayTime = `30:00 +${elapsed-1800}`;
     } else if(stage=="SH"){
-      elapsed +=30; // start second half from 30
-      if(elapsed <60) displayTime = `${elapsed}`;
-      else displayTime = `60 +${elapsed-60}`;
+      elapsed += 1800;
+      if(elapsed <=3600) displayTime = formatMinutes(elapsed);
+      else displayTime = `60:00 +${elapsed-3600}`;
     }
 
     document.getElementById("timer").textContent = displayTime;
   },1000);
+}
+
+function formatMinutes(sec){
+  let m=Math.floor(sec/60);
+  let s=sec%60;
+  return `${m}:${s.toString().padStart(2,"0")}`;
 }
 </script>
 </body>
