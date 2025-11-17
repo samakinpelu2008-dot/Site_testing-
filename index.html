@@ -3,306 +3,192 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Freshers Cup – CPE vs FRM</title>
+<title>Freshers Cup Live</title>
 <style>
-body{
-  margin:0; font-family:sans-serif; background:#0b8f2f; color:#fff; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding:20px; box-sizing:border-box;
-}
-.card{
-  background:#1e1e2f; width:100%; max-width:700px; border-radius:20px; padding:25px; box-shadow:0 15px 35px rgba(0,0,0,0.5);
-}
-.team-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
-.team{text-align:center; flex:1;}
-.team img{width:80px; height:80px; border-radius:50%; border:3px solid #fff; margin-bottom:10px;}
-.team h2{margin:0; font-size:22px;}
-.score{font-size:48px; font-weight:bold; color:#00ffcc; margin-top:5px;}
-.vs{font-size:32px; font-weight:700; color:#ffdd00; margin:0 10px;}
-.info-box{background: rgba(255,255,255,0.1); padding:15px; border-radius:12px; margin-bottom:20px;}
-.goal-box{background: rgba(255,255,255,0.1); padding:12px; border-radius:12px; margin-bottom:15px;}
-.commentary{background: rgba(255,255,255,0.1); border-radius:12px; padding:12px; max-height:150px; overflow-y:auto; margin-bottom:15px;}
-.fan-section{background: rgba(255,255,255,0.05); border-radius:12px; padding:12px; margin-bottom:20px;}
-.fan-section input{width:70%; padding:6px; border-radius:8px; border:none; margin-right:5px;}
-.fan-section button{padding:6px 10px; border-radius:8px; border:none; cursor:pointer; background:#ffdd00; color:#000;}
-#fanComments p {
-  background: rgba(255,255,255,0.1);
-  padding:8px;
-  border-radius:8px;
-  margin:4px 0;
-}
-.admin-btn{background:#ffdd00;color:#000;border:none;padding:8px 15px;border-radius:12px;cursor:pointer;margin-bottom:10px;}
-#adminPanel{display:none;margin-top:10px;background: rgba(255,255,255,0.15); padding:10px; border-radius:12px;}
-#adminPanel input, #adminPanel select, #adminPanel button{margin:5px 0;padding:6px;border-radius:8px;border:none;}
-#timer{
-  font-size:28px; font-weight:700; text-align:center; margin-bottom:10px; 
-  color: #00ff00; text-shadow:0 0 8px #00ff00;
-}
-#liveBar{
-  height:6px; width:20%; background:#00ff00; border-radius:3px;
-  margin:0 auto 10px auto; display:none;
-  animation: liveMove 2s infinite ease-in-out;
-}
-@keyframes liveMove{
-  0% { transform: translateX(-100%); opacity: 0; }
-  25% { transform: translateX(0%); opacity: 1; }
-  50% { transform: translateX(100%); opacity: 0; }
-  75% { transform: translateX(0%); opacity: 1; }
-  100% { transform: translateX(-100%); opacity: 0; }
-}
-.floatingHeart {
-  position:absolute;
-  font-size:24px;
-  animation: floatUp 1s ease-out forwards;
-  pointer-events:none;
-}
-@keyframes floatUp {
-  0% { opacity:1; transform: translateY(0) scale(1); }
-  100% { opacity:0; transform: translateY(-100px) scale(1.5); }
-}
-#loveButton{
-  position:fixed; bottom:30px; right:30px; font-size:40px; cursor:pointer; user-select:none;
-}
+  body {margin:0; font-family: Arial,sans-serif; background:#0b3d0b; color:white;}
+  header{background:#111; color:gold; padding:20px; text-align:center; font-size:28px; font-weight:bold;}
+  .scoreboard{
+    background:#1b4d1b; margin:20px auto; width:90%; padding:15px; border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.5); text-align:center;
+  }
+  .teams{display:flex; justify-content:space-around; align-items:center; font-size:24px;}
+  .teams img{width:50px; height:50px;}
+  .info-section{margin-top:10px; font-size:18px;}
+  #liveBar{
+    height:6px; width:15%; background:#00ff00; border-radius:3px;
+    margin:5px auto; display:none; animation: liveMove 3s infinite ease-in-out;
+  }
+  @keyframes liveMove{
+    0%   { transform: translateX(-100%) scaleX(0); opacity:0; }
+    25%  { transform: translateX(0%) scaleX(1); opacity:1; }
+    50%  { transform: translateX(100%) scaleX(0); opacity:0; }
+    75%  { transform: translateX(0%) scaleX(1); opacity:1; }
+    100% { transform: translateX(-100%) scaleX(0); opacity:0; }
+  }
+  #timer{font-size:24px; margin:10px 0; color:#00ff00;}
+  .goal-scorers{margin-top:10px;}
+  #fanComments, #liveComments{
+    background:#134d13; padding:10px; border-radius:8px; margin:10px 0; max-height:200px; overflow-y:auto;
+  }
+  #fanComments p,#liveComments p{margin:5px 0;}
+  .floatingHeart{
+    position:absolute;font-size:28px;animation: floatUp 2s ease-out forwards;pointer-events:none;
+  }
+  @keyframes floatUp{
+    0% {opacity:1; transform: translateY(0) scale(1);}
+    50% {opacity:1; transform: translateY(-80px) scale(1.3);}
+    100% {opacity:0; transform: translateY(-160px) scale(1.5);}
+  }
+  input,button{padding:5px; margin:3px;}
 </style>
 </head>
 <body>
+<header>Freshers Cup Live</header>
 
-<div class="card">
+<div class="scoreboard">
+  <div class="teams">
+    <div><strong>CPE Class 30</strong><br><img src="https://i.ibb.co/rR9PL8DG/IMG-20251116-200233.png"></div>
+    <div id="scoreDisplay" style="font-size:28px; font-weight:bold;">VS</div>
+    <div><strong>FRM Class 30</strong><br><img src="https://i.ibb.co/rR9PL8DG/IMG-20251116-200233.png"></div>
+  </div>
+  <div class="info-section">
+    <p>Event: Freshers Cup | Stage: First Stage</p>
+    <p>Venue: Lico Field, Lautech Ogbomosho</p>
+    <p>Weather: Sunny | Kickoff: 11:00</p>
+  </div>
+  <div id="timer">00:00</div>
   <div id="liveBar"></div>
-  <div id="timer">0:00</div>
-
-  <div class="team-row">
-    <div class="team">
-      <img src="https://i.ibb.co/XfTKYHJ0/IMG-20251009-WA0089.jpg" alt="CPE Logo">
-      <h2>CPE</h2>
-      <div class="score" id="scoreCPE"></div>
-    </div>
-    <div class="vs" id="vsDisplay">VS</div>
-    <div class="team">
-      <img src="https://i.ibb.co/rR9PL8DG/IMG-20251116-200233.png" alt="FRM Logo">
-      <h2>FRM</h2>
-      <div class="score" id="scoreFRM"></div>
-    </div>
-  </div>
-
-  <div class="info-box">
-    <p><strong>Competition:</strong> Freshers Cup</p>
-    <p><strong>Stage:</strong> Pre-match</p>
-    <p><strong>Venue:</strong> Lico Field</p>
-    <p><strong>Location:</strong> LAUTECH Ogbomosho</p>
-    <p><strong>Weather:</strong> Sunny</p>
-    <p><strong>Kick Off:</strong> 11:00 AM</p>
-  </div>
-
-  <div class="goal-box">
-    <h3>Goal Scorers</h3>
-    <p id="goals">None yet</p>
-  </div>
-
-  <div class="commentary">
-    <h3>Live Updates</h3>
-    <div id="liveComments"></div>
-  </div>
-
-  <div class="fan-section">
-    <h3>Fan Comments ❤️</h3>
-    <input type="text" id="fanComment" placeholder="Write your comment..." />
-    <button onclick="addFanComment()">Send</button>
-    <div id="fanComments"></div>
-  </div>
-
-  <button class="admin-btn" id="adminBtn">Show Admin Controls</button>
-  <div id="adminPanel">
-    <label>Stage:</label>
-    <select id="stageSelect">
-      <option value="PRE">Pre-match</option>
-      <option value="FH">First Half</option>
-      <option value="HT">Half-time</option>
-      <option value="SH">Second Half</option>
-      <option value="FT">Full-time</option>
-    </select>
-    <button onclick="changeStage()">Update Stage</button><br>
-
-    <label>CPE Score:</label><input type="number" id="cpeScore" min="0">
-    <button onclick="setScore('CPE')">Update</button><br>
-
-    <label>FRM Score:</label><input type="number" id="frmScore" min="0">
-    <button onclick="setScore('FRM')">Update</button><br>
-
-    <label>Goal Scorer:</label><input type="text" id="goalPlayer">
-    <button onclick="addGoal()">Add Goal</button><br>
-
-    <label>Commentary:</label><input type="text" id="commentText">
-    <button onclick="addCommentary()">Add Comment</button>
-  </div>
+  <div class="goal-scorers" id="goalScorers"><strong>Goal Scorers:</strong></div>
 </div>
 
-<div id="loveButton">💚</div>
+<!-- Fan Comments -->
+<div>
+  <h3>Fan Comments</h3>
+  <div id="fanComments"></div>
+  <input type="text" id="fanComment" placeholder="Write comment...">
+  <button onclick="addFanComment()">Send</button>
+</div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-<script>
+<!-- Live Updates -->
+<div>
+  <h3>Live Updates</h3>
+  <div id="liveComments"></div>
+  <input type="text" id="commentText" placeholder="Write update...">
+  <button onclick="addCommentary()">Post Update</button>
+</div>
+
+<!-- Love Button -->
+<button id="loveButton" style="position:fixed; bottom:20px; right:20px; padding:10px; font-size:20px;">💚</button>
+
+<script type="module">
+// Firebase setup
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyA2AScPQkOE632znM9vvCahijtnronS3jU",
   authDomain: "fresherscuplive.firebaseapp.com",
   databaseURL: "https://fresherscuplive-default-rtdb.firebaseio.com",
   projectId: "fresherscuplive",
-  storageBucket: "fresherscuplive.firebasestorage.app",
+  storageBucket: "fresherscuplive.appspot.com",
   messagingSenderId: "502451588704",
   appId: "1:502451588704:web:56bd4d7fc98814cddfbd05"
 };
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const matchRef = database.ref("match");
-const fanRef = database.ref("fanComments");
-const loveRef = database.ref("loveCount");
 
-const adminPassword = "CPE2025";
-document.getElementById("adminBtn").addEventListener("click", ()=>{
-  let pass = prompt("Enter admin password:");
-  if(pass === adminPassword){
-    document.getElementById("adminPanel").style.display="block";
-    document.getElementById("adminBtn").style.display="none";
-  } else alert("Wrong password!");
-});
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-let timerInterval = null;
+// ---------------- TIMER LOGIC ----------------
+let matchState = "preMatch"; // preMatch, firstHalf, halfTime, secondHalf, fullTime
+let matchStartTime = null;
+let elapsedBefore = 0;
+const timerEl = document.getElementById("timer");
+const liveBarEl = document.getElementById("liveBar");
+const firstHalfDuration = 30*60; // seconds
+const secondHalfDuration = 30*60;
+const extraTimeDuration = 5*60;
 
-// Match data listener
-matchRef.on("value", snapshot => {
-  const data = snapshot.val();
-  if(!data) return;
+function startMatchPhase(phase){
+  matchState = phase;
+  if(phase==="preMatch"){ timerEl.textContent="00:00"; liveBarEl.style.display="none"; return;}
+  if(phase==="firstHalf"){ matchStartTime = Date.now(); elapsedBefore=0; liveBarEl.style.display="block"; requestAnimationFrame(updateTimer);}
+  if(phase==="halfTime"){ liveBarEl.style.display="none"; }
+  if(phase==="secondHalf"){ matchStartTime=Date.now(); elapsedBefore=firstHalfDuration; liveBarEl.style.display="block"; requestAnimationFrame(updateTimer);}
+  if(phase==="fullTime"){ liveBarEl.style.display="none"; }
+}
 
-  document.getElementById("scoreCPE").textContent = data.scoreCPE || "";
-  document.getElementById("scoreFRM").textContent = data.scoreFRM || "";
-  document.getElementById("goals").textContent = (data.goalScorers && data.goalScorers.length>0)? data.goalScorers.join(", ") : "None yet";
+function updateTimer(){
+  if(matchState==="preMatch" || matchState==="halfTime" || matchState==="fullTime") return;
+  let elapsed = Math.floor((Date.now()-matchStartTime)/1000) + elapsedBefore;
+  let minutes = Math.floor(elapsed/60);
+  let seconds = elapsed%60;
+  if(matchState==="firstHalf" && elapsed>=firstHalfDuration) timerEl.textContent=`30:00 +${elapsed-firstHalfDuration}`;
+  else if(matchState==="secondHalf" && elapsed>=firstHalfDuration+secondHalfDuration) timerEl.textContent=`60:00 +${elapsed-(firstHalfDuration+secondHalfDuration)}`;
+  else timerEl.textContent=(minutes<10?'0':'')+minutes+':'+(seconds<10?'0':'')+seconds;
+  requestAnimationFrame(updateTimer);
+}
 
-  const liveDiv = document.getElementById("liveComments");
-  liveDiv.innerHTML = "";
-  if(data.liveComments) data.liveComments.forEach(c=>{
-    const p = document.createElement("p");
-    p.textContent=c;
-    liveDiv.appendChild(p);
-  });
-
-  document.getElementById("vsDisplay").textContent = (data.stage=="PRE")? "VS" : `${data.scoreCPE||0} - ${data.scoreFRM||0}`;
-
-  document.getElementById("liveBar").style.display = (["FH","HT","SH"].includes(data.stage)) ? "block":"none";
-
-  if(data.stage=="FH" || data.stage=="SH"){
-    if(data.startTime){
-      startLiveTimerFromStartTime(data.startTime, data.stage);
-    }
-  } else if(data.stage=="HT"){
-    document.getElementById("timer").textContent = "HALF-TIME";
-    clearInterval(timerInterval);
-  } else if(data.stage=="FT"){
-    document.getElementById("timer").textContent = "FULL-TIME";
-    clearInterval(timerInterval);
-  }
-});
-
-// Fan comments listener
-fanRef.on("value", snapshot=>{
-  const data = snapshot.val() || [];
+// ---------------- FAN COMMENTS ----------------
+let userId = localStorage.getItem("fanId");
+if(!userId){ userId="fan_"+Math.floor(Math.random()*1000000); localStorage.setItem("fanId", userId);}
+const fanRef = ref(db, "fans");
+function addFanComment(){
+  const text=document.getElementById("fanComment").value.trim(); if(!text) return;
+  const id = Date.now();
+  set(ref(db, `fans/${id}`), {text,user:userId});
+  document.getElementById("fanComment").value="";
+}
+onValue(fanRef, snapshot=>{
+  const data = snapshot.val()||{};
   const fanDiv = document.getElementById("fanComments");
-  fanDiv.innerHTML = "";
-  data.forEach(c=>{
-    const p = document.createElement("p");
-    p.textContent=c;
+  fanDiv.innerHTML="";
+  Object.keys(data).forEach(id=>{
+    const c = data[id];
+    const p=document.createElement("p");
+    p.textContent=c.text;
+    if(c.user===userId){
+      const del=document.createElement("span");
+      del.textContent=" 🗑️"; del.style.cursor="pointer"; del.style.marginLeft="5px";
+      del.onclick=()=> remove(ref(db, `fans/${id}`));
+      p.appendChild(del);
+    }
     fanDiv.appendChild(p);
   });
 });
 
-function changeStage(){
-  const stage = document.getElementById("stageSelect").value;
-  if(stage=="FH" || stage=="SH"){
-    matchRef.update({stage, startTime: Date.now()});
-  } else{
-    matchRef.update({stage});
-  }
-}
-
-function setScore(team){
-  const val = (team=="CPE")? Number(document.getElementById("cpeScore").value) : Number(document.getElementById("frmScore").value);
-  if(team=="CPE") matchRef.update({scoreCPE:val});
-  else matchRef.update({scoreFRM:val});
-}
-
-function addGoal(){
-  const player = document.getElementById("goalPlayer").value.trim();
-  if(!player) return;
-  matchRef.child("goalScorers").once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.push(player);
-    matchRef.update({goalScorers:arr});
-  });
-  document.getElementById("goalPlayer").value="";
-}
-
+// ---------------- LIVE UPDATES ----------------
+const matchRef = ref(db,"liveComments");
 function addCommentary(){
-  const text = document.getElementById("commentText").value.trim();
-  if(!text) return;
-  matchRef.child("liveComments").once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.push(text);
-    matchRef.update({liveComments:arr});
-  });
+  const text=document.getElementById("commentText").value.trim(); if(!text) return;
+  const id=Date.now();
+  set(ref(db, `liveComments/${id}`), {text,user:"admin"});
   document.getElementById("commentText").value="";
 }
-
-// Fan comment
-function addFanComment(){
-  const text = document.getElementById("fanComment").value.trim();
-  if(!text) return;
-  fanRef.once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.push(text);
-    fanRef.set(arr);
-  });
-  document.getElementById("fanComment").value="";
-}
-
-// Floating love button
-document.getElementById("loveButton").addEventListener("click", e=>{
-  const heart = document.createElement("div");
-  heart.className="floatingHeart";
-  heart.textContent="💚";
-  heart.style.left=(e.clientX-12)+"px";
-  heart.style.top=(e.clientY-12)+"px";
-  document.body.appendChild(heart);
-  setTimeout(()=>heart.remove(),1000);
-
-  loveRef.once("value").then(s=>{
-    let count = s.val()||0;
-    loveRef.set(count+1);
+onValue(matchRef, snapshot=>{
+  const data = snapshot.val()||{};
+  const liveDiv = document.getElementById("liveComments");
+  liveDiv.innerHTML="";
+  Object.keys(data).forEach(id=>{
+    const c=data[id];
+    const p=document.createElement("p");
+    p.textContent=c.text;
+    if(c.user==="admin"){
+      const del=document.createElement("span");
+      del.textContent=" 🗑️"; del.style.cursor="pointer"; del.style.marginLeft="5px";
+      del.onclick=()=> remove(ref(db, `liveComments/${id}`));
+      p.appendChild(del);
+    }
+    liveDiv.appendChild(p);
   });
 });
 
-// Timer function
-function startLiveTimerFromStartTime(startTimestamp, stage){
-  if(timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(()=>{
-    const now = Date.now();
-    let elapsed = Math.floor((now - startTimestamp)/1000);
-    let displayTime = "";
-
-    if(stage=="FH"){
-      if(elapsed <=1800) displayTime = formatMinutes(elapsed);
-      else displayTime = `30:00 +${elapsed-1800}`;
-    } else if(stage=="SH"){
-      elapsed += 1800;
-      if(elapsed <=3600) displayTime = formatMinutes(elapsed);
-      else displayTime = `60:00 +${elapsed-3600}`;
-    }
-
-    document.getElementById("timer").textContent = displayTime;
-  },1000);
-}
-
-function formatMinutes(sec){
-  let m=Math.floor(sec/60);
-  let s=sec%60;
-  return `${m}:${s.toString().padStart(2,"0")}`;
-}
+// ---------------- FLOATING HEARTS ----------------
+document.getElementById("loveButton").addEventListener("click", e=>{
+  const heart=document.createElement("div");
+  heart.className="floatingHeart"; heart.textContent="💚";
+  heart.style.left=(e.clientX-14)+"px"; heart.style.top=(e.clientY-14)+"px";
+  document.body.appendChild(heart); setTimeout(()=>heart.remove(),2000);
+});
 </script>
 </body>
 </html>
