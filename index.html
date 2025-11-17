@@ -56,10 +56,13 @@ body{
 }
 @keyframes floatUp {
   0% { opacity:1; transform: translateY(0) scale(1); }
-  100% { opacity:0; transform: translateY(-100px) scale(1.5); }
+  100% { opacity:0; transform: translateY(-250px) scale(1.5); }
 }
 #loveButton{
   position:fixed; bottom:30px; right:30px; font-size:40px; cursor:pointer; user-select:none;
+}
+.deleteBtn{
+  margin-left:10px; cursor:pointer; color:#ff4444; font-weight:bold;
 }
 </style>
 </head>
@@ -94,7 +97,7 @@ body{
 
   <div class="goal-box">
     <h3>Goal Scorers</h3>
-    <p id="goals">None yet</p>
+    <div id="goals">None yet</div>
   </div>
 
   <div class="commentary">
@@ -173,13 +176,32 @@ matchRef.on("value", snapshot => {
 
   document.getElementById("scoreCPE").textContent = data.scoreCPE || "";
   document.getElementById("scoreFRM").textContent = data.scoreFRM || "";
-  document.getElementById("goals").textContent = (data.goalScorers && data.goalScorers.length>0)? data.goalScorers.join(", ") : "None yet";
+
+  const goalsDiv = document.getElementById("goals");
+  goalsDiv.innerHTML = "";
+  if(data.goalScorers){
+    data.goalScorers.forEach((g,i)=>{
+      const p = document.createElement("p");
+      p.textContent = g;
+      const del = document.createElement("span");
+      del.className="deleteBtn";
+      del.textContent="❌";
+      del.onclick = ()=>deleteGoal(i);
+      p.appendChild(del);
+      goalsDiv.appendChild(p);
+    });
+  } else goalsDiv.textContent = "None yet";
 
   const liveDiv = document.getElementById("liveComments");
   liveDiv.innerHTML = "";
-  if(data.liveComments) data.liveComments.forEach(c=>{
+  if(data.liveComments) data.liveComments.forEach((c,i)=>{
     const p = document.createElement("p");
     p.textContent=c;
+    const del = document.createElement("span");
+    del.className="deleteBtn";
+    del.textContent="❌";
+    del.onclick = ()=>deleteLiveUpdate(i);
+    p.appendChild(del);
     liveDiv.appendChild(p);
   });
 
@@ -202,12 +224,17 @@ matchRef.on("value", snapshot => {
 
 // Fan comments listener
 fanRef.on("value", snapshot=>{
-  const data = snapshot.val() || [];
+  const data = snapshot.val()||[];
   const fanDiv = document.getElementById("fanComments");
-  fanDiv.innerHTML = "";
-  data.forEach(c=>{
+  fanDiv.innerHTML="";
+  data.forEach((c,i)=>{
     const p = document.createElement("p");
     p.textContent=c;
+    const del = document.createElement("span");
+    del.className="deleteBtn";
+    del.textContent="❌";
+    del.onclick = ()=>deleteFanComment(i);
+    p.appendChild(del);
     fanDiv.appendChild(p);
   });
 });
@@ -261,7 +288,43 @@ function addFanComment(){
   document.getElementById("fanComment").value="";
 }
 
+// Delete functions
+function deleteGoal(index){
+  const pass = prompt("Enter admin password to delete:");
+  if(pass!==adminPassword) return alert("Wrong password!");
+  matchRef.child("goalScorers").once("value").then(s=>{
+    let arr = s.val()||[];
+    arr.splice(index,1);
+    matchRef.update({goalScorers:arr});
+  });
+}
+
+function deleteLiveUpdate(index){
+  const pass = prompt("Enter admin password to delete:");
+  if(pass!==adminPassword) return alert("Wrong password!");
+  matchRef.child("liveComments").once("value").then(s=>{
+    let arr = s.val()||[];
+    arr.splice(index,1);
+    matchRef.update({liveComments:arr});
+  });
+}
+
+function deleteFanComment(index){
+  const pass = prompt("Enter admin password to delete fan comment:");
+  if(pass!==adminPassword) return alert("Wrong password!");
+  fanRef.once("value").then(s=>{
+    let arr = s.val()||[];
+    arr.splice(index,1);
+    fanRef.set(arr);
+  });
+}
+
 // Floating love button
+loveRef.on("value", snapshot=>{
+  const count = snapshot.val()||0;
+  document.getElementById("loveCount")?.textContent = count;
+});
+
 document.getElementById("loveButton").addEventListener("click", e=>{
   const heart = document.createElement("div");
   heart.className="floatingHeart";
@@ -269,7 +332,7 @@ document.getElementById("loveButton").addEventListener("click", e=>{
   heart.style.left=(e.clientX-12)+"px";
   heart.style.top=(e.clientY-12)+"px";
   document.body.appendChild(heart);
-  setTimeout(()=>heart.remove(),1000);
+  setTimeout(()=>heart.remove(),2000);
 
   loveRef.once("value").then(s=>{
     let count = s.val()||0;
@@ -280,28 +343,22 @@ document.getElementById("loveButton").addEventListener("click", e=>{
 // Timer function
 function startLiveTimerFromStartTime(startTimestamp, stage){
   if(timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(()=>{
-    const now = Date.now();
-    let elapsed = Math.floor((now - startTimestamp)/1000);
-    let displayTime = "";
+  timerInterval=setInterval(()=>{
+    const now=Date.now();
+    let elapsed=Math.floor((now-startTimestamp)/60/1000); // in minutes
+    let displayTime="";
 
     if(stage=="FH"){
-      if(elapsed <=1800) displayTime = formatMinutes(elapsed);
-      else displayTime = `30:00 +${elapsed-1800}`;
+      if(elapsed<=30) displayTime=`${elapsed}'`;
+      else displayTime=`30' +${elapsed-30}`;
     } else if(stage=="SH"){
-      elapsed += 1800;
-      if(elapsed <=3600) displayTime = formatMinutes(elapsed);
-      else displayTime = `60:00 +${elapsed-3600}`;
+      elapsed+=30;
+      if(elapsed<=60) displayTime=`${elapsed}'`;
+      else displayTime=`60' +${elapsed-60}`;
     }
 
-    document.getElementById("timer").textContent = displayTime;
+    document.getElementById("timer").textContent=displayTime;
   },1000);
-}
-
-function formatMinutes(sec){
-  let m=Math.floor(sec/60);
-  let s=sec%60;
-  return `${m}:${s.toString().padStart(2,"0")}`;
 }
 </script>
 </body>
