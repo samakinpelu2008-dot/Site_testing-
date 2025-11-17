@@ -3,363 +3,283 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Freshers Cup – CPE vs FRM</title>
+<title>CPE LIVE MATCH</title>
+
 <style>
-body{
-  margin:0; font-family:sans-serif; background:#0b8f2f; color:#fff; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding:20px; box-sizing:border-box;
-}
-.card{
-  background:#1e1e2f; width:100%; max-width:700px; border-radius:20px; padding:25px; box-shadow:0 15px 35px rgba(0,0,0,0.5);
-}
-.team-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
-.team{text-align:center; flex:1;}
-.team img{width:80px; height:80px; border-radius:50%; border:3px solid #fff; margin-bottom:10px;}
-.team h2{margin:0; font-size:22px;}
-.score{font-size:48px; font-weight:bold; color:#00ffcc; margin-top:5px;}
-.vs{font-size:32px; font-weight:700; color:#ffdd00; margin:0 10px;}
-.info-box{background: rgba(255,255,255,0.1); padding:15px; border-radius:12px; margin-bottom:20px;}
-.goal-box{background: rgba(255,255,255,0.1); padding:12px; border-radius:12px; margin-bottom:15px;}
-.commentary{background: rgba(255,255,255,0.1); border-radius:12px; padding:12px; max-height:150px; overflow-y:auto; margin-bottom:15px;}
-.fan-section{background: rgba(255,255,255,0.05); border-radius:12px; padding:12px; margin-bottom:20px;}
-.fan-section input{width:70%; padding:6px; border-radius:8px; border:none; margin-right:5px;}
-.fan-section button{padding:6px 10px; border-radius:8px; border:none; cursor:pointer; background:#ffdd00; color:#000;}
-#fanComments p {
-  background: rgba(255,255,255,0.1);
-  padding:8px;
-  border-radius:8px;
-  margin:4px 0;
-}
-.admin-btn{background:#ffdd00;color:#000;border:none;padding:8px 15px;border-radius:12px;cursor:pointer;margin-bottom:10px;}
-#adminPanel{display:none;margin-top:10px;background: rgba(255,255,255,0.15); padding:10px; border-radius:12px;}
-#adminPanel input, #adminPanel select, #adminPanel button{margin:5px 0;padding:6px;border-radius:8px;border:none;}
-#timer{
-  font-size:28px; font-weight:700; text-align:center; margin-bottom:10px; 
-  color: #00ff00; text-shadow:0 0 8px #00ff00;
-}
-#liveBar{
-  height:6px; width:20%; background:#00ff00; border-radius:3px;
-  margin:0 auto 10px auto; display:none;
-  animation: liveMove 2s infinite ease-in-out;
-}
-@keyframes liveMove{
-  0% { transform: translateX(-100%); opacity: 0; }
-  25% { transform: translateX(0%); opacity: 1; }
-  50% { transform: translateX(100%); opacity: 0; }
-  75% { transform: translateX(0%); opacity: 1; }
-  100% { transform: translateX(-100%); opacity: 0; }
-}
-.floatingHeart {
-  position:absolute;
-  font-size:24px;
-  animation: floatUp 1s ease-out forwards;
-  pointer-events:none;
-}
-@keyframes floatUp {
-  0% { opacity:1; transform: translateY(0) scale(1); }
-  100% { opacity:0; transform: translateY(-250px) scale(1.5); }
-}
-#loveButton{
-  position:fixed; bottom:30px; right:30px; font-size:40px; cursor:pointer; user-select:none;
-}
-.deleteBtn{
-  margin-left:10px; cursor:pointer; color:#ff4444; font-weight:bold;
-}
+    body {
+        font-family: Arial, sans-serif;
+        background: #ffffff;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background: #0033cc;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .section {
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+
+    input, textarea {
+        width: 90%;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid #999;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 10px 18px;
+        margin-top: 10px;
+        background: #0033cc;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .scoreboard {
+        text-align: center;
+        padding: 20px 0;
+        font-size: 35px;
+        font-weight: bold;
+    }
+
+    .timerBox {
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .item {
+        padding: 10px;
+        background: #f2f2f2;
+        margin-top: 10px;
+        border-radius: 5px;
+        position: relative;
+    }
+
+    .delete-btn {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        background: red;
+        padding: 5px 10px;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        display: none;
+    }
+
+    /* HEART ANIMATION */
+    .heart {
+        position: fixed;
+        font-size: 25px;
+        color: green;
+        animation: floatUp 2s linear;
+        pointer-events: none;
+    }
+
+    @keyframes floatUp {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-250px); }
+    }
+
+    #adminPanel {
+        background: #eee;
+        padding: 15px;
+        display: none;
+    }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <div id="liveBar"></div>
-  <div id="timer">0:00</div>
+<header>CPE LIVE MATCH</header>
 
-  <div class="team-row">
-    <div class="team">
-      <img src="https://i.ibb.co/XfTKYHJ0/IMG-20251009-WA0089.jpg" alt="CPE Logo">
-      <h2>CPE</h2>
-      <div class="score" id="scoreCPE"></div>
-    </div>
-    <div class="vs" id="vsDisplay">VS</div>
-    <div class="team">
-      <img src="https://i.ibb.co/rR9PL8DG/IMG-20251116-200233.png" alt="FRM Logo">
-      <h2>FRM</h2>
-      <div class="score" id="scoreFRM"></div>
-    </div>
-  </div>
-
-  <div class="info-box">
-    <p><strong>Competition:</strong> Freshers Cup</p>
-    <p><strong>Stage:</strong> Pre-match</p>
-    <p><strong>Venue:</strong> Lico Field</p>
-    <p><strong>Location:</strong> LAUTECH Ogbomosho</p>
-    <p><strong>Weather:</strong> Sunny</p>
-    <p><strong>Kick Off:</strong> 11:00 AM</p>
-  </div>
-
-  <div class="goal-box">
-    <h3>Goal Scorers</h3>
-    <div id="goals">None yet</div>
-  </div>
-
-  <div class="commentary">
-    <h3>Live Updates</h3>
-    <div id="liveComments"></div>
-  </div>
-
-  <div class="fan-section">
-    <h3>Fan Comments ❤️</h3>
-    <input type="text" id="fanComment" placeholder="Write your comment..." />
-    <button onclick="addFanComment()">Send</button>
-    <div id="fanComments"></div>
-  </div>
-
-  <button class="admin-btn" id="adminBtn">Show Admin Controls</button>
-  <div id="adminPanel">
-    <label>Stage:</label>
-    <select id="stageSelect">
-      <option value="PRE">Pre-match</option>
-      <option value="FH">First Half</option>
-      <option value="HT">Half-time</option>
-      <option value="SH">Second Half</option>
-      <option value="FT">Full-time</option>
-    </select>
-    <button onclick="changeStage()">Update Stage</button><br>
-
-    <label>CPE Score:</label><input type="number" id="cpeScore" min="0">
-    <button onclick="setScore('CPE')">Update</button><br>
-
-    <label>FRM Score:</label><input type="number" id="frmScore" min="0">
-    <button onclick="setScore('FRM')">Update</button><br>
-
-    <label>Goal Scorer:</label><input type="text" id="goalPlayer">
-    <button onclick="addGoal()">Add Goal</button><br>
-
-    <label>Commentary:</label><input type="text" id="commentText">
-    <button onclick="addCommentary()">Add Comment</button>
-  </div>
+<!-- SCOREBOARD -->
+<div class="scoreboard">
+    <span id="scoreA">0</span> - <span id="scoreB">0</span>
 </div>
 
-<div id="loveButton">💚</div>
+<!-- TIMER -->
+<div class="timerBox">
+    <span id="timer">0'</span>
+</div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<div class="section">
+    <button onclick="startTimer()">Start</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resetTimer()">Reset</button>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="section">
+    <h2>Admin Login</h2>
+    <input id="adminUser" placeholder="Enter Username">
+    <input id="adminPass" placeholder="Enter Password" type="password">
+    <button onclick="loginAdmin()">Login</button>
+</div>
+
+<div id="adminPanel">
+    <h2>Admin Panel</h2>
+    <p>Delete unlocked for admin.</p>
+</div>
+
+<!-- LIVE UPDATES -->
+<div class="section">
+    <h2>Live Update</h2>
+    <textarea id="liveInput" placeholder="Enter update..."></textarea>
+    <button onclick="addLive()">Post Update</button>
+    <div id="liveList"></div>
+</div>
+
+<!-- SCORERS -->
+<div class="section">
+    <h2>Scorers</h2>
+    <textarea id="scoreInput" placeholder="Enter scorer name..."></textarea>
+    <button onclick="addScorer()">Add Scorer</button>
+    <div id="scoreList"></div>
+</div>
+
+<!-- COMMENTS -->
+<div class="section">
+    <h2>Fan Comments</h2>
+    <textarea id="commentInput" placeholder="Write comment..."></textarea>
+    <button onclick="addComment()">Post Comment</button>
+    <div id="commentList"></div>
+</div>
+
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA2AScPQkOE632znM9vvCahijtnronS3jU",
-  authDomain: "fresherscuplive.firebaseapp.com",
-  databaseURL: "https://fresherscuplive-default-rtdb.firebaseio.com",
-  projectId: "fresherscuplive",
-  storageBucket: "fresherscuplive.firebasestorage.app",
-  messagingSenderId: "502451588704",
-  appId: "1:502451588704:web:56bd4d7fc98814cddfbd05"
-};
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const matchRef = database.ref("match");
-const fanRef = database.ref("fanComments");
-const loveRef = database.ref("loveCount");
+let isAdmin = false;
 
-const adminPassword = "CPE2025";
-document.getElementById("adminBtn").addEventListener("click", ()=>{
-  let pass = prompt("Enter admin password:");
-  if(pass === adminPassword){
-    document.getElementById("adminPanel").style.display="block";
-    document.getElementById("adminBtn").style.display="none";
-  } else alert("Wrong password!");
-});
+// TIMER SYSTEM
+let minute = 0;
+let timerRunning = false;
+let interval;
 
-let timerInterval = null;
+function startTimer() {
+    if (timerRunning) return;
 
-// Match data listener
-matchRef.on("value", snapshot => {
-  const data = snapshot.val();
-  if(!data) return;
+    timerRunning = true;
+    interval = setInterval(() => {
+        minute++;
 
-  document.getElementById("scoreCPE").textContent = data.scoreCPE || "";
-  document.getElementById("scoreFRM").textContent = data.scoreFRM || "";
+        if (minute <= 90) {
+            document.getElementById("timer").innerHTML = minute + "'";
+        } else {
+            let extra = minute - 90;
+            document.getElementById("timer").innerHTML = "90+" + extra + "'";
+        }
+    }, 1000); // 1 second = 1 minute (football simulation)
+}
 
-  const goalsDiv = document.getElementById("goals");
-  goalsDiv.innerHTML = "";
-  if(data.goalScorers){
-    data.goalScorers.forEach((g,i)=>{
-      const p = document.createElement("p");
-      p.textContent = g;
-      const del = document.createElement("span");
-      del.className="deleteBtn";
-      del.textContent="❌";
-      del.onclick = ()=>deleteGoal(i);
-      p.appendChild(del);
-      goalsDiv.appendChild(p);
-    });
-  } else goalsDiv.textContent = "None yet";
+function pauseTimer() {
+    clearInterval(interval);
+    timerRunning = false;
+}
 
-  const liveDiv = document.getElementById("liveComments");
-  liveDiv.innerHTML = "";
-  if(data.liveComments) data.liveComments.forEach((c,i)=>{
-    const p = document.createElement("p");
-    p.textContent=c;
-    const del = document.createElement("span");
-    del.className="deleteBtn";
-    del.textContent="❌";
-    del.onclick = ()=>deleteLiveUpdate(i);
-    p.appendChild(del);
-    liveDiv.appendChild(p);
-  });
+function resetTimer() {
+    clearInterval(interval);
+    timerRunning = false;
+    minute = 0;
+    document.getElementById("timer").innerHTML = "0'";
+}
 
-  document.getElementById("vsDisplay").textContent = (data.stage=="PRE")? "VS" : `${data.scoreCPE||0} - ${data.scoreFRM||0}`;
 
-  document.getElementById("liveBar").style.display = (["FH","HT","SH"].includes(data.stage)) ? "block":"none";
+// ADMIN LOGIN
+function loginAdmin() {
+    const u = document.getElementById("adminUser").value.trim();
+    const p = document.getElementById("adminPass").value.trim();
 
-  if(data.stage=="FH" || data.stage=="SH"){
-    if(data.startTime){
-      startLiveTimerFromStartTime(data.startTime, data.stage);
+    if (u === "CPESPORT'S" && p === "CPE2025") {
+        isAdmin = true;
+        document.getElementById("adminPanel").style.display = "block";
+        enableDeleteButtons();
+        alert("Admin Unlocked!");
+    } else {
+        alert("Wrong admin details");
     }
-  } else if(data.stage=="HT"){
-    document.getElementById("timer").textContent = "HALF-TIME";
-    clearInterval(timerInterval);
-  } else if(data.stage=="FT"){
-    document.getElementById("timer").textContent = "FULL-TIME";
-    clearInterval(timerInterval);
-  }
+}
+
+function enableDeleteButtons() {
+    document.querySelectorAll(".delete-btn").forEach(btn => btn.style.display = "block");
+}
+
+
+// HEART ANIMATION
+document.body.addEventListener("click", function(e) {
+    let h = document.createElement("div");
+    h.className = "heart";
+    h.style.left = e.clientX + "px";
+    h.style.top = e.clientY + "px";
+    h.innerHTML = "💚";
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 2000);
 });
 
-// Fan comments listener
-fanRef.on("value", snapshot=>{
-  const data = snapshot.val()||[];
-  const fanDiv = document.getElementById("fanComments");
-  fanDiv.innerHTML="";
-  data.forEach((c,i)=>{
-    const p = document.createElement("p");
-    p.textContent=c;
-    const del = document.createElement("span");
-    del.className="deleteBtn";
-    del.textContent="❌";
-    del.onclick = ()=>deleteFanComment(i);
-    p.appendChild(del);
-    fanDiv.appendChild(p);
-  });
-});
 
-function changeStage(){
-  const stage = document.getElementById("stageSelect").value;
-  if(stage=="FH" || stage=="SH"){
-    matchRef.update({stage, startTime: Date.now()});
-  } else{
-    matchRef.update({stage});
-  }
+// ADD LIVE UPDATE
+function addLive() {
+    const text = document.getElementById("liveInput").value.trim();
+    if (!text) return;
+
+    let div = makeItem(text);
+    document.getElementById("liveList").appendChild(div);
+    document.getElementById("liveInput").value = "";
 }
 
-function setScore(team){
-  const val = (team=="CPE")? Number(document.getElementById("cpeScore").value) : Number(document.getElementById("frmScore").value);
-  if(team=="CPE") matchRef.update({scoreCPE:val});
-  else matchRef.update({scoreFRM:val});
+// ADD SCORER
+function addScorer() {
+    const text = document.getElementById("scoreInput").value.trim();
+    if (!text) return;
+
+    let div = makeItem(text);
+    document.getElementById("scoreList").appendChild(div);
+    document.getElementById("scoreInput").value = "";
 }
 
-function addGoal(){
-  const player = document.getElementById("goalPlayer").value.trim();
-  if(!player) return;
-  matchRef.child("goalScorers").once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.push(player);
-    matchRef.update({goalScorers:arr});
-  });
-  document.getElementById("goalPlayer").value="";
+// ADD COMMENT
+function addComment() {
+    const text = document.getElementById("commentInput").value.trim();
+    if (!text) return;
+
+    let div = makeItem(text);
+    document.getElementById("commentList").appendChild(div);
+    document.getElementById("commentInput").value = "";
 }
 
-function addCommentary(){
-  const text = document.getElementById("commentText").value.trim();
-  if(!text) return;
-  matchRef.child("liveComments").once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.push(text);
-    matchRef.update({liveComments:arr});
-  });
-  document.getElementById("commentText").value="";
+
+// CREATE ITEM BOX
+function makeItem(text) {
+    let div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = text;
+
+    let del = document.createElement("button");
+    del.className = "delete-btn";
+    del.innerHTML = "Delete";
+    del.onclick = () => div.remove();
+
+    if (isAdmin) del.style.display = "block";
+
+    div.appendChild(del);
+    return div;
 }
 
-// Fan comment
-function addFanComment(){
-  const text = document.getElementById("fanComment").value.trim();
-  if(!text) return;
-  fanRef.once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.push(text);
-    fanRef.set(arr);
-  });
-  document.getElementById("fanComment").value="";
-}
-
-// Delete functions
-function deleteGoal(index){
-  const pass = prompt("Enter admin password to delete:");
-  if(pass!==adminPassword) return alert("Wrong password!");
-  matchRef.child("goalScorers").once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.splice(index,1);
-    matchRef.update({goalScorers:arr});
-  });
-}
-
-function deleteLiveUpdate(index){
-  const pass = prompt("Enter admin password to delete:");
-  if(pass!==adminPassword) return alert("Wrong password!");
-  matchRef.child("liveComments").once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.splice(index,1);
-    matchRef.update({liveComments:arr});
-  });
-}
-
-function deleteFanComment(index){
-  const pass = prompt("Enter admin password to delete fan comment:");
-  if(pass!==adminPassword) return alert("Wrong password!");
-  fanRef.once("value").then(s=>{
-    let arr = s.val()||[];
-    arr.splice(index,1);
-    fanRef.set(arr);
-  });
-}
-
-// Floating love button
-loveRef.on("value", snapshot=>{
-  const count = snapshot.val()||0;
-  document.getElementById("loveCount")?.textContent = count;
-});
-
-document.getElementById("loveButton").addEventListener("click", e=>{
-  const heart = document.createElement("div");
-  heart.className="floatingHeart";
-  heart.textContent="💚";
-  heart.style.left=(e.clientX-12)+"px";
-  heart.style.top=(e.clientY-12)+"px";
-  document.body.appendChild(heart);
-  setTimeout(()=>heart.remove(),2000);
-
-  loveRef.once("value").then(s=>{
-    let count = s.val()||0;
-    loveRef.set(count+1);
-  });
-});
-
-// Timer function
-function startLiveTimerFromStartTime(startTimestamp, stage){
-  if(timerInterval) clearInterval(timerInterval);
-  timerInterval=setInterval(()=>{
-    const now=Date.now();
-    let elapsed=Math.floor((now-startTimestamp)/60/1000); // in minutes
-    let displayTime="";
-
-    if(stage=="FH"){
-      if(elapsed<=30) displayTime=`${elapsed}'`;
-      else displayTime=`30' +${elapsed-30}`;
-    } else if(stage=="SH"){
-      elapsed+=30;
-      if(elapsed<=60) displayTime=`${elapsed}'`;
-      else displayTime=`60' +${elapsed-60}`;
-    }
-
-    document.getElementById("timer").textContent=displayTime;
-  },1000);
-}
 </script>
+
 </body>
 </html>
