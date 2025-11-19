@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Freshers Cup – CPE vs FRM</title>
 <style>
 body{
@@ -45,6 +45,7 @@ body{
   font-size:24px;
   animation: floatUp 2.0s ease-out forwards;
   pointer-events:none;
+  z-index:9999;
 }
 @keyframes floatUp {
   0% { opacity:1; transform: translateY(0) scale(1); }
@@ -71,6 +72,7 @@ body{
       <h2>FRM</h2>
     </div>
   </div>
+
   <div class="info-box">
     <p><strong>Competition:</strong> Freshers Cup</p>
     <p><strong>Stage:</strong> Pre-match</p>
@@ -130,6 +132,9 @@ body{
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 <script>
+/* -------------------------
+   Firebase config (your keys)
+   ------------------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyA2AScPQkOE632znM9vvCahijtnronS3jU",
   authDomain: "fresherscuplive.firebaseapp.com",
@@ -141,10 +146,18 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
+
+/* -------------------------
+   References (existing + new)
+   ------------------------- */
 const matchRef = database.ref("match");
 const fanRef = database.ref("fanComments");
-const loveRef = database.ref("loveCount");
+const loveRef = database.ref("loveCount");        // keeps total count (optional)
+const loveActionsRef = database.ref("loveActions"); // new: stores individual like events
 
+/* -------------------------
+   Admin password + UI logic
+   ------------------------- */
 const adminPassword = "CPE2025";
 document.getElementById("adminBtn").addEventListener("click", ()=>{
   let pass = prompt("Enter admin password:");
@@ -156,7 +169,9 @@ document.getElementById("adminBtn").addEventListener("click", ()=>{
 
 let timerInterval = null;
 
-// Match listener
+/* -------------------------
+   Match listener (unchanged, small tidy)
+   ------------------------- */
 matchRef.on("value", snapshot => {
   const data = snapshot.val();
   if(!data) return;
@@ -165,33 +180,39 @@ matchRef.on("value", snapshot => {
 
   const goalDiv = document.getElementById("goals");
   goalDiv.innerHTML = "";
-  if(data.goalScorers) data.goalScorers.forEach((g,i)=>{
-    const p = document.createElement("p");
-    p.textContent = g;
-    if(document.getElementById("adminPanel").style.display=="block"){
-      const btn = document.createElement("span");
-      btn.textContent="❌";
-      btn.className="deleteBtn";
-      btn.onclick = ()=>deleteGoal(i);
-      p.appendChild(btn);
-    }
-    goalDiv.appendChild(p);
-  });
+  if(data.goalScorers && data.goalScorers.length){
+    data.goalScorers.forEach((g,i)=>{
+      const p = document.createElement("p");
+      p.textContent = g;
+      if(document.getElementById("adminPanel").style.display=="block"){
+        const btn = document.createElement("span");
+        btn.textContent="❌";
+        btn.className="deleteBtn";
+        btn.onclick = ()=>deleteGoal(i);
+        p.appendChild(btn);
+      }
+      goalDiv.appendChild(p);
+    });
+  } else {
+    goalDiv.textContent = "None yet";
+  }
 
   const liveDiv = document.getElementById("liveComments");
   liveDiv.innerHTML="";
-  if(data.liveComments) data.liveComments.forEach((c,i)=>{
-    const p=document.createElement("p");
-    p.textContent=c;
-    if(document.getElementById("adminPanel").style.display=="block"){
-      const btn=document.createElement("span");
-      btn.textContent="❌";
-      btn.className="deleteBtn";
-      btn.onclick=()=>deleteComment(i);
-      p.appendChild(btn);
-    }
-    liveDiv.appendChild(p);
-  });
+  if(data.liveComments && data.liveComments.length) {
+    data.liveComments.forEach((c,i)=>{
+      const p=document.createElement("p");
+      p.textContent=c;
+      if(document.getElementById("adminPanel").style.display=="block"){
+        const btn=document.createElement("span");
+        btn.textContent="❌";
+        btn.className="deleteBtn";
+        btn.onclick=()=>deleteComment(i);
+        p.appendChild(btn);
+      }
+      liveDiv.appendChild(p);
+    });
+  }
 
   document.getElementById("liveBar").style.display = (["FH","HT","SH"].includes(data.stage)) ? "block":"none";
 
@@ -206,7 +227,9 @@ matchRef.on("value", snapshot => {
   }
 });
 
-// Fan comments
+/* -------------------------
+   Fan comments listener
+   ------------------------- */
 fanRef.on("value", snapshot=>{
   const data = snapshot.val()||[];
   const fanDiv = document.getElementById("fanComments");
@@ -218,7 +241,9 @@ fanRef.on("value", snapshot=>{
   });
 });
 
-// Stage, Score, Goal, Commentary functions
+/* -------------------------
+   Stage, Score, Goal, Commentary functions
+   ------------------------- */
 function changeStage(){
   const stage = document.getElementById("stageSelect").value;
   if(stage=="FH" || stage=="SH"){
@@ -270,7 +295,9 @@ function deleteComment(i){
 }
 function deleteAllComments(){ matchRef.update({liveComments:[]}); }
 
-// Fan comments
+/* -------------------------
+   Fan comments add
+   ------------------------- */
 function addFanComment(){
   const text = document.getElementById("fanComment").value.trim();
   if(!text) return;
@@ -282,23 +309,64 @@ function addFanComment(){
   document.getElementById("fanComment").value="";
 }
 
-// Floating love button
-document.getElementById("loveButton").addEventListener("click", e=>{
-  const heart=document.createElement("div");
-  heart.className="floatingHeart";
-  heart.textContent="💚";
-  heart.style.left=(e.clientX-12)+"px";
-  heart.style.top=(e.clientY-12)+"px";
-  document.body.appendChild(heart);
-  setTimeout(()=>heart.remove(),1500);
+/* -------------------------
+   Heart spawn & real-time broadcasting
+   ------------------------- */
+/* spawnHeart: creates floating heart at coordinates */
+function spawnHeart(x, y){
+  const heart = document.createElement("div");
+  heart.className = "floatingHeart";
+  heart.textContent = "💚";
 
-  loveRef.once("value").then(s=>{
-    let count=s.val()||0;
-    loveRef.set(count+1);
+  // Bound positions to viewport to avoid off-screen
+  const left = Math.max(8, Math.min(window.innerWidth - 32, x - 12));
+  const top  = Math.max(8, Math.min(window.innerHeight - 32, y - 12));
+
+  heart.style.left = left + "px";
+  heart.style.top = top + "px";
+  document.body.appendChild(heart);
+
+  setTimeout(()=>heart.remove(),1500);
+}
+
+/* When the local user clicks the like button:
+   1) show heart locally
+   2) push an action to loveActionsRef (so all clients hear it)
+   3) increment the loveCount atomically (optional but useful)
+*/
+document.getElementById("loveButton").addEventListener("click", e=>{
+  // show immediate feedback on the clicker's screen
+  spawnHeart(e.clientX, e.clientY);
+
+  // push an action so everyone (including the clicker) receives a child_added event
+  // we don't need to store x,y exactly for others (viewport differs),
+  // but we keep them as metadata if you want to use them later
+  loveActionsRef.push({
+    x: e.clientX,
+    y: e.clientY,
+    time: Date.now()
+  });
+
+  // increment the live count safely using a transaction
+  loveRef.transaction(current => {
+    return (current || 0) + 1;
   });
 });
 
-// Timer
+/* Listener: when any client pushes a like action, spawn hearts on ALL connected clients */
+loveActionsRef.on("child_added", snapshot=>{
+  const data = snapshot.val() || {};
+
+  // Use random X so hearts appear in different places for different users (more natural).
+  // You may switch to using data.x if you prefer consistent placement across devices.
+  const randomX = Math.random() * (window.innerWidth - 80) + 40;
+  const baseY = window.innerHeight - 120; // hearts start near bottom
+  spawnHeart(randomX, baseY);
+});
+
+/* -------------------------
+   Timer helper
+   ------------------------- */
 function startLiveTimerFromStartTime(startTimestamp, stage){
   if(timerInterval) clearInterval(timerInterval);
   timerInterval=setInterval(()=>{
@@ -320,4 +388,4 @@ function startLiveTimerFromStartTime(startTimestamp, stage){
 }
 </script>
 </body>
-</html>
+  </html>
