@@ -376,7 +376,7 @@ function startLiveTimerFromStartTime(startTimestamp, stage){
 
     if(stage=="FH"){
       if(elapsed<=30) displayTime=elapsed.toString();
-      else displayTime=`30 +${elapsed-30}`;
+      else displayTime=`15 +${elapsed-30}`;
     } else if(stage=="SH"){
       elapsed +=30;
       if(elapsed<=60) displayTime=elapsed.toString();
